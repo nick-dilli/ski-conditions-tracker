@@ -14,16 +14,16 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background-color: #007bff;
+      background-color: #020642;
       color: white;
-      padding: 15px 20px;
+      padding: 10px 10px;
       box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
       position: sticky;
       top: 0;
       z-index: 10;
     }
     header img {
-      height: 50px;
+      height: 60px;
     }
     nav {
       display: flex;
@@ -33,10 +33,9 @@
       text-decoration: none;
       color: white;
       font-weight: bold;
-      padding: 10px 15px;
     }
     nav a.active {
-      border-bottom: 3px solid yellow;
+      border-bottom: 3px solid rgb(255, 255, 255);
     }
     main {
       padding: 20px;
@@ -143,16 +142,15 @@
           scales: {
             y: {
               beginAtZero: true,
+              grid: { display: false },
               title: {
                 display: true,
                 text: 'Snowfall (inches)'
               }
             },
             x: {
-              title: {
-                display: true,
-                text: 'Resorts'
-              }
+              grid: { display: false },
+              title: { display: false }
             }
           }
         }
