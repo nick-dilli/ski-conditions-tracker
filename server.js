@@ -41,7 +41,7 @@ const snowfallData = [
   { Year: 2020, Resort: "Vail", "Annual Snowfall (inches)": 340, "Estimated Annual Visitors (millions)": 1.7 },
   { Year: 2020, Resort: "Keystone", "Annual Snowfall (inches)": 235, "Estimated Annual Visitors (millions)": 1 },
   { Year: 2020, Resort: "Crested Butte", "Annual Snowfall (inches)": 255, "Estimated Annual Visitors (millions)": 0.5 },
-  { Year: 2020, Resort: "Telluride", "Annual Snowfall (inches)": 275, "Estimated Annual Visitors (millions)": 0.6 }
+  { Year: 2020, Resort: "Telluride", "Annual Snowfall (inches)": 275, "Estimated Annual Visitors (millions)": 0.6 },
 ];
 
 // API endpoint to fetch data

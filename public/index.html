@@ -117,12 +117,12 @@
       const labels = filteredData.map(data => data.Resort);
       const snowfallValues = filteredData.map(data => data['Annual Snowfall (inches)']);
 
-      const canvas = document.getElementById('snowfallChart');
-      const ctx = canvas.getContext('2d');
+      const ctx = document.getElementById('snowfallChart').getContext('2d');
 
-      canvas.width = canvas.width; // Clear the canvas
-
-      if (window.snowfallChart) window.snowfallChart.destroy();
+      // Safely destroy the previous chart instance if it exists
+      if (window.snowfallChart && typeof window.snowfallChart.destroy === 'function') {
+        window.snowfallChart.destroy();
+      }
 
       window.snowfallChart = new Chart(ctx, {
         type: 'bar',
