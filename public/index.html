@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ski Resort Snowfall</title>
+  <script>
+    async function fetchSnowfall() {
+      const resort = document.getElementById("resort").value;
+      const response = await fetch(`/api/snowfall/${resort}`);
+      const data = await response.json();
+      document.getElementById("snowfall").innerText = `Total Snowfall: ${data.snowfall} inches`;
+    }
+  </script>
+</head>
+<body>
+  <h1>Ski Resort Snowfall Tracker</h1>
+  <label for="resort">Choose a ski resort:</label>
+  <select id="resort" onchange="fetchSnowfall()">
+    <option value="">--Select--</option>
+    <option value="resort1">Resort 1</option>
+    <option value="resort2">Resort 2</option>
+    <option value="resort3">Resort 3</option>
+  </select>
+  <p id="snowfall">Total Snowfall: </p>
+</body>
+</html>
