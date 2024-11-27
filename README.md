@@ -1,2 +1,2 @@
-# ski-conditions-tracker
+# ski-resort-tracker
  
