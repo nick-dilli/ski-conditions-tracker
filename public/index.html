@@ -3,25 +3,130 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ski Resort Snowfall</title>
-  <script>
-    async function fetchSnowfall() {
-      const resort = document.getElementById("resort").value;
-      const response = await fetch(`/api/snowfall/${resort}`);
-      const data = await response.json();
-      document.getElementById("snowfall").innerText = `Total Snowfall: ${data.snowfall} inches`;
+  <title>SkiTracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
-  </script>
+    header {
+      display: flex;
+      align-items: center;
+      background-color: #f8f9fa;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+    }
+    header img {
+      height: 50px;
+      margin-right: 20px;
+    }
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+    nav a {
+      text-decoration: none;
+      color: black;
+      font-weight: bold;
+      padding: 10px 5px;
+    }
+    nav a.active {
+      border-bottom: 3px solid blue;
+    }
+    main {
+      padding: 20px;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    select {
+      font-size: 16px;
+      margin-bottom: 20px;
+      padding: 5px;
+    }
+    canvas {
+      width: 100%;
+      height: auto;
+    }
+  </style>
 </head>
 <body>
-  <h1>Ski Resort Snowfall Tracker</h1>
-  <label for="resort">Choose a ski resort:</label>
-  <select id="resort" onchange="fetchSnowfall()">
-    <option value="">--Select--</option>
-    <option value="resort1">Resort 1</option>
-    <option value="resort2">Resort 2</option>
-    <option value="resort3">Resort 3</option>
-  </select>
-  <p id="snowfall">Total Snowfall: </p>
+  <header>
+    <img src="logo.png" alt="SkiTracker Logo">
+    <nav>
+      <a href="#" class="active">Snowfall</a>
+      <a href="#">Visitors</a>
+    </nav>
+  </header>
+  <main>
+    <label for="year">Select Year:</label>
+    <select id="year" onchange="updateChart()">
+      <!-- Years will be dynamically populated -->
+    </select>
+    <div class="chart-container">
+      <canvas id="snowfallChart"></canvas>
+    </div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let snowfallData = []; // Data fetched from the server
+
+    // Populate the dropdown and initialize the chart
+    async function init() {
+      const response = await fetch('/api/data');
+      snowfallData = await response.json();
+
+      const years = [...new Set(snowfallData.map(data => data.Year))].sort();
+      const yearDropdown = document.getElementById('year');
+      years.forEach(year => {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        yearDropdown.appendChild(option);
+      });
+
+      yearDropdown.value = years[years.length - 1]; // Select the latest year
+      updateChart();
+    }
+
+    // Update the chart based on the selected year
+    function updateChart() {
+      const selectedYear = document.getElementById('year').value;
+      const filteredData = snowfallData.filter(data => data.Year == selectedYear);
+
+      const labels = filteredData.map(data => data.Resort);
+      const snowfallValues = filteredData.map(data => data['Annual Snowfall (inches)']);
+
+      const ctx = document.getElementById('snowfallChart').getContext('2d');
+      if (window.snowfallChart) window.snowfallChart.destroy(); // Destroy previous chart if it exists
+      window.snowfallChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Annual Snowfall (inches)',
+            data: snowfallValues,
+            backgroundColor: ['#007bff', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1']
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: true }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    }
+
+    // Initialize the page
+    init();
+  </script>
 </body>
 </html>
