@@ -13,13 +13,17 @@
     header {
       display: flex;
       align-items: center;
-      background-color: #f8f9fa;
-      padding: 10px 20px;
-      border-bottom: 1px solid #ccc;
+      justify-content: space-between;
+      background-color: #007bff;
+      color: white;
+      padding: 15px 20px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     header img {
       height: 50px;
-      margin-right: 20px;
     }
     nav {
       display: flex;
@@ -27,20 +31,23 @@
     }
     nav a {
       text-decoration: none;
-      color: black;
+      color: white;
       font-weight: bold;
-      padding: 10px 5px;
+      padding: 10px 15px;
     }
     nav a.active {
-      border-bottom: 3px solid blue;
+      border-bottom: 3px solid yellow;
     }
     main {
       padding: 20px;
     }
     .chart-container {
-      width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
+      text-align: center;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     }
     select {
       font-size: 16px;
@@ -76,32 +83,47 @@
 
     // Populate the dropdown and initialize the chart
     async function init() {
-      const response = await fetch('/api/data');
-      snowfallData = await response.json();
+      try {
+        const response = await fetch('/api/data'); // Fetch data from server
+        snowfallData = await response.json();
 
-      const years = [...new Set(snowfallData.map(data => data.Year))].sort();
-      const yearDropdown = document.getElementById('year');
-      years.forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearDropdown.appendChild(option);
-      });
+        const years = [...new Set(snowfallData.map(data => data.Year))].sort((a, b) => b - a);
+        const yearDropdown = document.getElementById('year');
+        yearDropdown.innerHTML = ""; // Clear dropdown before populating
 
-      yearDropdown.value = years[years.length - 1]; // Select the latest year
-      updateChart();
+        years.forEach(year => {
+          const option = document.createElement('option');
+          option.value = year;
+          option.textContent = year;
+          yearDropdown.appendChild(option);
+        });
+
+        yearDropdown.value = years[0]; // Select newest year
+        updateChart();
+      } catch (error) {
+        console.error('Failed to fetch snowfall data:', error);
+      }
     }
 
-    // Update the chart based on the selected year
     function updateChart() {
       const selectedYear = document.getElementById('year').value;
       const filteredData = snowfallData.filter(data => data.Year == selectedYear);
 
+      if (!filteredData.length) {
+        console.error('No data for the selected year.');
+        return;
+      }
+
       const labels = filteredData.map(data => data.Resort);
       const snowfallValues = filteredData.map(data => data['Annual Snowfall (inches)']);
 
-      const ctx = document.getElementById('snowfallChart').getContext('2d');
-      if (window.snowfallChart) window.snowfallChart.destroy(); // Destroy previous chart if it exists
+      const canvas = document.getElementById('snowfallChart');
+      const ctx = canvas.getContext('2d');
+
+      canvas.width = canvas.width; // Clear the canvas
+
+      if (window.snowfallChart) window.snowfallChart.destroy();
+
       window.snowfallChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -119,13 +141,24 @@
             tooltip: { enabled: true }
           },
           scales: {
-            y: { beginAtZero: true }
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Snowfall (inches)'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Resorts'
+              }
+            }
           }
         }
       });
     }
 
-    // Initialize the page
     init();
   </script>
 </body>
