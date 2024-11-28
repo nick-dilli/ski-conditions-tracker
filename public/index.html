@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SkiTracker</title>
+  <title>Ski Resort Tracker</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -27,7 +27,9 @@
     }
     nav {
       display: flex;
-      gap: 20px;
+      justify-content: center;
+      flex: 1;
+      gap: 50px;
     }
     nav a {
       text-decoration: none;
@@ -64,7 +66,7 @@
     <img src="logo.png" alt="SkiTracker Logo">
     <nav>
       <a href="#" class="active">Snowfall</a>
-      <a href="#">Visitors</a>
+      <a href="#visitors">Visitors</a>
     </nav>
   </header>
   <main>
@@ -79,65 +81,74 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     let snowfallData = []; // Data fetched from the server
-
+    let selectedMetric = 'snowfall'; // Default metric is snowfall
+  
     // Populate the dropdown and initialize the chart
     async function init() {
       try {
         const response = await fetch('/api/data'); // Fetch data from server
         snowfallData = await response.json();
-
+  
         const years = [...new Set(snowfallData.map(data => data.Year))].sort((a, b) => b - a);
         const yearDropdown = document.getElementById('year');
         yearDropdown.innerHTML = ""; // Clear dropdown before populating
-
+  
         years.forEach(year => {
           const option = document.createElement('option');
           option.value = year;
           option.textContent = year;
           yearDropdown.appendChild(option);
         });
-
+  
         yearDropdown.value = years[0]; // Select newest year
         updateChart();
       } catch (error) {
         console.error('Failed to fetch snowfall data:', error);
       }
     }
-
+  
     function updateChart() {
       const selectedYear = document.getElementById('year').value;
       const filteredData = snowfallData.filter(data => data.Year == selectedYear);
-
+  
       if (!filteredData.length) {
         console.error('No data for the selected year.');
         return;
       }
-
+  
       const labels = filteredData.map(data => data.Resort);
-      const snowfallValues = filteredData.map(data => data['Annual Snowfall (inches)']);
-
+      const chartValues =
+        selectedMetric === 'snowfall'
+          ? filteredData.map(data => data['Annual Snowfall (inches)'])
+          : filteredData.map(data => data['Estimated Annual Visitors (millions)']);
+  
       const ctx = document.getElementById('snowfallChart').getContext('2d');
-
+  
       // Safely destroy the previous chart instance if it exists
       if (window.snowfallChart && typeof window.snowfallChart.destroy === 'function') {
         window.snowfallChart.destroy();
       }
-
+  
       window.snowfallChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels,
-          datasets: [{
-            label: 'Annual Snowfall (inches)',
-            data: snowfallValues,
-            backgroundColor: ['#007bff', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1']
-          }]
+          datasets: [
+            {
+              label:
+                selectedMetric === 'snowfall'
+                  ? 'Annual Snowfall (inches)'
+                  : 'Estimated Visitors (millions)',
+              data: chartValues,
+              backgroundColor: ['#007bff', '#fd7e14', '#28a745', '#17a2b8', '#6f42c1'],
+            },
+          ],
         },
         options: {
           responsive: true,
           plugins: {
             legend: { display: false },
-            tooltip: { enabled: true }
+            tooltip: { enabled: true },
           },
           scales: {
             y: {
@@ -145,19 +156,37 @@
               grid: { display: false },
               title: {
                 display: true,
-                text: 'Snowfall (inches)'
-              }
+                text:
+                  selectedMetric === 'snowfall'
+                    ? 'Snowfall (inches)'
+                    : 'Visitors (millions)',
+              },
             },
             x: {
               grid: { display: false },
-              title: { display: false }
-            }
-          }
-        }
+              title: { display: false },
+            },
+          },
+        },
       });
     }
-
+  
+    // Add event listeners to toggle between Snowfall and Visitors
+    document.querySelector('a[href="#"]').addEventListener('click', () => {
+      selectedMetric = 'snowfall';
+      document.querySelector('a[href="#"]').classList.add('active');
+      document.querySelector('a[href="#visitors"]').classList.remove('active');
+      updateChart();
+    });
+  
+    document.querySelector('a[href="#visitors"]').addEventListener('click', () => {
+      selectedMetric = 'visitors';
+      document.querySelector('a[href="#visitors"]').classList.add('active');
+      document.querySelector('a[href="#"]').classList.remove('active');
+      updateChart();
+    });
+  
     init();
-  </script>
+  </script>  
 </body>
 </html>
